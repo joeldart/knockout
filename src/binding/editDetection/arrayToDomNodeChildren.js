@@ -40,6 +40,12 @@
         var nodesToDelete = [];
         var nodesAdded = [];
         var insertAfterNode = null;
+	var originalNode;
+	if (options.location === "sibling") {
+		insertAfterNode = domNode;
+		originalNode = domNode;
+		domNode = domNode.parentNode;
+	}
         for (var i = 0, j = editScript.length; i < j; i++) {
             switch (editScript[i].status) {
                 case "retained":
@@ -118,7 +124,9 @@
                 if (node.element.parentNode)
                     node.element.parentNode.removeChild(node.element);
             });
-
+	if (options.location === "sibling") {
+		domNode = originalNode;
+	}	
         // Store a copy of the array items we just considered so we can difference it next time
         ko.utils.domData.set(domNode, "setDomNodeChildrenFromArrayMapping_lastMappingResult", newMappingResult);
     }

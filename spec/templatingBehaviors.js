@@ -418,5 +418,21 @@ describe('Templating', {
         
         // ...but, because the old subscription should have been disposed automatically, there should only be one left
         value_of(myModel.myObservable.getSubscriptionsCount()).should_be(1);
+    },
+    
+    'Passing location of sibling renders the foreach template as a sibling of the node instead of a child': function () {
+        var myArray = new ko.observableArray([{ personName: "Bob" }, { personName: "Frank"}]);
+        ko.setTemplateEngine(new dummyTemplateEngine({ itemTemplate: "The item is [js: personName]" }));
+        testNode.innerHTML = "<div><div data-bind='template: { name: \"itemTemplate\", foreach: myCollection, location: \"sibling\" }'></div></div>";
+
+        ko.applyBindings({ myCollection: myArray }, testNode);
+        value_of(testNode.childNodes[0].innerHTML.toLowerCase().replace("\r\n", "")).should_be("<div data-bind='template: { name: \"itemtemplate\", foreach: mycollection, location: \"sibling\" }'></div><div>the item is bob</div><div>the item is frank</div>");
+	
+	myArray.push({personName: "Steve" });
+	value_of(testNode.childNodes[0].innerHTML.toLowerCase().replace("\r\n", "")).should_be("<div data-bind='template: { name: \"itemtemplate\", foreach: mycollection, location: \"sibling\" }'></div><div>the item is bob</div><div>the item is frank</div><div>the item is steve</div>");
+	myArray.splice(1, 0, {personName: "another"});
+	value_of(testNode.childNodes[0].innerHTML.toLowerCase().replace("\r\n", "")).should_be("<div data-bind='template: { name: \"itemtemplate\", foreach: mycollection, location: \"sibling\" }'></div><div>the item is bob</div><div>the item is another</div><div>the item is frank</div><div>the item is steve</div>");
+	myArray.splice(0,0, {personName: "initial"});
+	value_of(testNode.childNodes[0].innerHTML.toLowerCase().replace("\r\n", "")).should_be("<div data-bind='template: { name: \"itemtemplate\", foreach: mycollection, location: \"sibling\" }'></div><div>the item is initial</div><div>the item is bob</div><div>the item is another</div><div>the item is frank</div><div>the item is steve</div>");
     }
 })
